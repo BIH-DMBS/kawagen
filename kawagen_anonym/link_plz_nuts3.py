@@ -3,6 +3,9 @@ import pandas as pd
 import argparse
 import os
 import numpy as np
+import zipfile
+import time
+
 
 # default paths
 #base = r'c:\code\plz'
@@ -10,6 +13,8 @@ import numpy as np
 #nuts3_shp = base + r'\extracted_shapefile\nuts250_12-31.gk3.shape\nuts250_1231\NUTS250_N3.shp'
 
 plz_gpkg = r'PLZ_Gebiete.gpkg'
+zip_file = r'nuts250_12-31.gk3.shape.zip'
+#nuts3_shp = r'extracted_shapefile\nuts250_12-31.gk3.shape\nuts250_1231\NUTS250_N3.shp'
 nuts3_shp = r'extracted_shapefile\nuts250_12-31.gk3.shape\nuts250_1231\NUTS250_N3.shp'
 
 # command-line arguments will override test_csv and PLZ length
@@ -17,11 +22,11 @@ nuts3_shp = r'extracted_shapefile\nuts250_12-31.gk3.shape\nuts250_1231\NUTS250_N
 parser = argparse.ArgumentParser(
     description='Link a PLZ-based CSV to NUTS3 areas.')
 parser.add_argument('input_csv', nargs='?', default=r'\test_data.csv',
-                    help='path to csv file containing PLZ column')
+    help='path to csv file containing PLZ column')
 parser.add_argument('-l', '--length', type=int, default=5,
-                    help='number of leading digits of PLZ to use for matching (2-5)')
+    help='number of leading digits of PLZ to use for matching (2-5)')
 parser.add_argument('-o', '--output', default=None,
-                    help='output csv path (default derives from input)')
+    help='output csv path (default derives from input)')
 args = parser.parse_args()
 
 # python link_plz_nuts3.py test_data_plz2.csv -l 2 -o test_data_plz2_nuts3.csv
@@ -55,7 +60,6 @@ def reduce_plz_precision(gdf: gpd.GeoDataFrame, digits: int) -> gpd.GeoDataFrame
 
     return result
 
-
 input_csv = args.input_csv
 plz_length = args.length
 
@@ -87,7 +91,14 @@ reduced_gdf_plz = reduce_plz_precision(gdf_plz, digits=plz_length)
 print(reduced_gdf_plz.head())
 
 # read polygons
-nuts3_gdf = gpd.read_file(nuts3_shp)
+try:
+    nuts3_gdf = gpd.read_file(nuts3_shp)
+except Exception:
+    print(f"Shapefile not found, extracting from {zip_file}...")
+    extract_dir = "extracted_shapefile"
+    with zipfile.ZipFile(zip_file, 'r') as z:
+        z.extractall(extract_dir)
+    nuts3_gdf = gpd.read_file(nuts3_shp)
 
 
 # ensure consistent CRS (use EPSG:3035 as in notebook template)
@@ -121,7 +132,7 @@ df_merged = df.merge(mapping, left_on='plz', right_on='plz', how='left')
 
 print(df_merged.head())
 # select and rename columns for output
-      
+
 df_out = df_merged[['Diagnosis_Feststellungsdatum',
                     'Diagnose_Dokumentationsdatum',
                     'Beginn_Einrichtungskontakt',
@@ -130,27 +141,38 @@ df_out = df_merged[['Diagnosis_Feststellungsdatum',
                     'plz',
                     'NUTS_CODE',
                     'note',
-                    'NUTS_NAME']]
+                    'NUTS_NAME']].copy()
+
+def parse_date(series):
+    return pd.to_datetime(series, format="mixed", dayfirst=False)
 
 # Alter in Jahren zum Diagnosis_Feststellungsdatum
-parsed = pd.to_datetime(df_out["Geburtsdatum"], format="%Y-%m-%d")
-df_out["Alter_Feststellungsdatum"] = ((pd.to_datetime(df_out["Diagnosis_Feststellungsdatum"], format="%Y-%m-%d") - parsed).dt.days / 365.25).astype(int)
-df_out["Alter_Dokumentationsdatum"] = ((pd.to_datetime(df_out["Diagnose_Dokumentationsdatum"], format="%Y-%m-%d") - parsed).dt.days / 365.25).astype(int)
-df_out["Alter_Beginn_Einrichtungskontakt"] = ((pd.to_datetime(df_out["Beginn_Einrichtungskontakt"], format="%Y-%m-%d") - parsed).dt.days / 365.25).astype(int)
-# drop original birthdate column
+parsed = parse_date(df_out["Geburtsdatum"])
+df_out["Alter_Feststellungsdatum"] = ((parse_date(df_out["Diagnosis_Feststellungsdatum"]) - parsed).dt.days / 365.25).round().astype("Int64")
+df_out["Alter_Dokumentationsdatum"] = ((parse_date(df_out["Diagnose_Dokumentationsdatum"]) - parsed).dt.days / 365.25).round().astype("Int64")
+df_out["Alter_Beginn_Einrichtungskontakt"] = ((parse_date(df_out["Beginn_Einrichtungskontakt"]) - parsed).dt.days / 365.25).round().astype("Int64")
 df_out = df_out.drop(columns=['Geburtsdatum'])
 
-# cover data to year and calendar week format (e.g. 2020_05 for 5th week of 2020)
-parsed = pd.to_datetime(df_out["Diagnosis_Feststellungsdatum"], format="%Y-%m-%d")
-df_out["Diagnosis_Feststellungsdatum"] = parsed.dt.year.astype(str) + '_' + parsed.dt.isocalendar().week.astype(str).str.zfill(2)
-parsed = pd.to_datetime(df_out["Diagnose_Dokumentationsdatum"], format="%Y-%m-%d")
-df_out["Diagnose_Dokumentationsdatum"] = parsed.dt.year.astype(str) + '_' + parsed.dt.isocalendar().week.astype(str).str.zfill(2)
-parsed = pd.to_datetime(df_out["Beginn_Einrichtungskontakt"], format="%Y-%m-%d")
-df_out["Beginn_Einrichtungskontakt"] = parsed.dt.year.astype(str) + '_' + parsed.dt.isocalendar().week.astype(str).str.zfill(2)
+def to_year_week(series):
+    """Convert date column to YYYY_WW format, but YYYY if input was year-only."""
+    is_year_only = series.astype(str).str.match(r'^\d{4}$')
+    parsed = parse_date(series)
+    year = parsed.dt.year
+    week = parsed.dt.isocalendar().week
+    year_week = year.astype("Int64").astype(str) + '_' + week.astype("Int64").astype(str).str.zfill(2)
+    result = year_week.where(~is_year_only, year.astype("Int64").astype(str))
+    # Keep NaN as empty string
+    result[parsed.isna()] = ""
+    return result
 
-# assign random ID
-df_out['unique_id'] = np.random.randint(10**11, 10**12, size=len(df), dtype=np.int64)
+df_out["Diagnosis_Feststellungsdatum"] = to_year_week(df_out["Diagnosis_Feststellungsdatum"])
+df_out["Diagnose_Dokumentationsdatum"] = to_year_week(df_out["Diagnose_Dokumentationsdatum"])
+df_out["Beginn_Einrichtungskontakt"] = to_year_week(df_out["Beginn_Einrichtungskontakt"])
 
+
+# assign random ID based on time in ms + random component
+# assign random ID based on time in ms + random component
+df_out['unique_id'] = int(time.time() * 1000) * 10**6 + np.random.randint(10**6, 10**7, size=len(df_out), dtype=np.int64)
 # drop columns not needed for output
 df_out = df_out.drop(columns=['plz', 'note'])
 
