@@ -4,6 +4,12 @@ This document explains how to use the `link_plz_nuts3.py` script to join German 
 
 ---
 
+## Attention:
+
+The actual input file, with the real occurencaes of the disease, should contain one entry per patient listing the earliest diagnosis date.
+
+---
+
 ## Prerequisites
 
 - Python 3.x with the following packages installed:
