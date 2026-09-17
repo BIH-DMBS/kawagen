@@ -1,0 +1,30 @@
+id,Encounter_period_start,Condition_recordedDate,Patient_gender,Feststellungsdatum,NUTS_CODE,NUTS_NAME,age_encounter_start,age_recordedDate,age_Feststellungsdatum
+0,,2024_33,male,2019_20,DE300,Berlin,,55,50
+0,2019_20,2019_20,male,2019_20,DE300,Berlin,50,50,50
+1,2023_41,2023_41,male,2019_20,DE600,Hamburg,84,84,80
+2,2022_45,2022_45,male,2019_20,DE212,"München, Kreisfreie Stadt",28,28,25
+3,2024_22,2024_22,other,2019_20,DEA11,"Düsseldorf, Kreisfreie Stadt",43,43,38
+4,2021_36,2021_36,female,2019_20,DEA23,"Köln, Kreisfreie Stadt",39,39,37
+5,2017_25,2017_25,male,2019_18,DE712,"Frankfurt am Main, Kreisfreie Stadt",40,40,42
+6,2022_40,2022_40,female,2019_18,DE111,"Stuttgart, Stadtkreis",64,64,61
+7,2024_08,2024_08,female,,DE929,Region Hannover,43,43,
+8,2023_14,2023_14,other,,DED21,"Dresden, Kreisfreie Stadt",53,53,
+9,2022_21,2022_21,female,,DED51,"Leipzig, Kreisfreie Stadt",59,59,
+10,2024_02,2024_02,female,,DE501,"Bremen, Kreisfreie Stadt",32,32,
+11,2021_37,2021_37,unknown,,DEA52,"Dortmund, Kreisfreie Stadt",59,59,
+12,2023_45,2023_45,male,,DEA13,"Essen, Kreisfreie Stadt",65,65,
+13,2023_28,2023_28,female,,DEA23,"Köln, Kreisfreie Stadt",38,38,
+14,2022_10,2022_10,male,,DEB35,"Mainz, Kreisfreie Stadt",47,47,
+15,2022_13,2022_13,female,,DE714,"Wiesbaden, Kreisfreie Stadt",54,54,
+16,2020_38,2022_48,male,,DE126,"Mannheim, Stadtkreis",58,60,
+17,2024_07,2024_08,male,,DE122,"Karlsruhe, Stadtkreis",47,47,
+17,2024_07,2024_08,male,,DE122,"Karlsruhe, Stadtkreis",47,47,
+18,2024_09,2024_09,other,,DE132,Breisgau-Hochschwarzwald,24,24,
+19,2023_48,2023_48,male,,DE271,"Augsburg, Kreisfreie Stadt",44,44,
+20,2019_40,2019_40,male,,DE254,"Nürnberg, Kreisfreie Stadt",58,58,
+21,2022_45,2022_45,male,,DEG01,"Erfurt, Kreisfreie Stadt",55,55,
+22,2024_22,2024_22,unknown,,DEF02,"Kiel, Kreisfreie Stadt",14,14,
+23,2020_48,2020_48,unknown,,DEE03,"Magdeburg, Kreisfreie Stadt",66,66,
+24,2018_12,2018_12,male,,DEA41,"Bielefeld, Kreisfreie Stadt",52,52,
+25,2021_02,2021_02,male,,DEA33,"Münster, Kreisfreie Stadt",32,32,
+26,2021_50,2021_50,female,,DEA22,"Bonn, Kreisfreie Stadt",79,79,
