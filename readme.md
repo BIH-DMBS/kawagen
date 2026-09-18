@@ -1,6 +1,6 @@
 # PLZ → NUTS3 Linkage — User Guide
 
-This guide explains how to run `link_plz_nuts3.py`, which assigns German postal code (PLZ) areas in pseudonymised FHIR clinical records to NUTS3 regional boundaries. For a step-by-step walkthrough of every processing stage — including intermediate outputs and design rationale — refer to the companion notebook [`test_data_merge.ipynb`](test_data_merge.ipynb).
+This guide explains how to run `link_plz_nuts3.py`, which assigns German postal code (PLZ) areas in pseudonymised FHIR clinical records to NUTS3 regional boundaries. For a step-by-step walkthrough of every processing stage — including intermediate outputs and design rationale — refer to the companion notebook [[`test_data_merge.ipynb`](test_data_merge.ipynb](https://github.com/BIH-DMBS/kawagen/blob/master/kawagen_anonym/test_data_merge.ipynb)).
 
 ---
 
