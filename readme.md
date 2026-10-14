@@ -1,6 +1,6 @@
 # PLZ → NUTS3 Linkage — User Guide
 
-This guide explains how to run `link_plz_nuts3.py`, which assigns German postal code (PLZ) areas in pseudonymised FHIR clinical records to NUTS3 regional boundaries. For a step-by-step walkthrough of every processing stage — including intermediate outputs and design rationale — refer to the companion notebook [test_data_merge.ipynb]([https://github.com/BIH-DMBS/kawagen/blob/master/kawagen_anonym/test_data_merge.ipynb](https://github.com/BIH-DMBS/kawagen/blob/master/kawagen_anonym/test_data_merge.ipynb)).
+This guide explains how to run `link_plz_nuts3.py`, which assigns German postal code (PLZ) areas in pseudonymised FHIR clinical records to NUTS3 regional boundaries. For a step-by-step walkthrough of every processing stage — including intermediate outputs and design rationale — refer to the companion notebook [test_data_merge.ipynb](https://github.com/BIH-DMBS/kawagen/blob/master/kawagen_anonym/test_data_merge.ipynb).
 
 ---
 
@@ -22,7 +22,7 @@ Place the following files in your working directory before running the script:
 | `test_data_filled/KontaktGesundheitseinrichtung.csv` | FHIR Encounter resources (CSV export) |
 | `test_data_filled/PatientPseudonymisiert.csv` | Pseudonymised FHIR Patient resources (CSV export) |
 
-In the `folder test_data_ori_fdpg` you find the inital provided to us by the FDPG for the development of the script. 
+In the `folder test_data_ori_fdpg`, you find the CSV files that the FDPG originally provided to us for the development of the script. 
 
 The script extracts the NUTS3 shapefile from the ZIP archive automatically on first run.
 
