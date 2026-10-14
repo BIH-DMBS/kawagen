@@ -1,6 +1,6 @@
 # PLZ → NUTS3 Linkage — User Guide
 
-This guide explains how to run `link_plz_nuts3.py`, which assigns German postal code (PLZ) areas in pseudonymised FHIR clinical records to NUTS3 regional boundaries. For a step-by-step walkthrough of every processing stage — including intermediate outputs and design rationale — refer to the companion notebook [test_data_merge.ipynb](https://github.com/BIH-DMBS/kawagen/blob/master/kawagen_anonym/test_data_merge.ipynb).
+This guide explains how to run `link_plz_nuts3.py`, which assigns German postal code (PLZ) areas in pseudonymised FHIR clinical records to NUTS3 regional boundaries. For a step-by-step walkthrough of every processing stage — including intermediate outputs and design rationale — refer to the companion notebook [test_data_merge.ipynb]([https://github.com/BIH-DMBS/kawagen/blob/master/kawagen_anonym/test_data_merge.ipynb](https://github.com/BIH-DMBS/kawagen/blob/master/kawagen_anonym/test_data_merge.ipynb)).
 
 ---
 
@@ -22,7 +22,7 @@ Place the following files in your working directory before running the script:
 | `test_data_filled/KontaktGesundheitseinrichtung.csv` | FHIR Encounter resources (CSV export) |
 | `test_data_filled/PatientPseudonymisiert.csv` | Pseudonymised FHIR Patient resources (CSV export) |
 
-In the `folder test_data_ori_fdpg` you find the inital files to send by the FDPG to us to develop the script. 
+In the `folder test_data_ori_fdpg` you find the inital provided to us by the FDPG for the development of the script. 
 
 The script extracts the NUTS3 shapefile from the ZIP archive automatically on first run.
 
@@ -35,9 +35,9 @@ For a first test just run:
 python link_plz_nuts3.py
 ```
 
-If real data is availablealter the paths to the input files and aoutput file at the top of the script.
+If real data is available, change the paths to the input files and the output file at the top of the script.
 
-The script runs non-interactively and prints progress messages to the console. On completion it writes per default `result.csv` to the working directory.
+The script runs non-interactively and prints progress messages to the console. On completion it writes the file `result.csv` to the working directory per default.
 
 ---
 
@@ -59,7 +59,7 @@ Each PLZ zone is assigned to the NUTS3 region that covers the largest portion of
 
 **Step 9 — Age computation**
 
-Patient ages (in complete years) are calculated at three clinical event dates: encounter start, condition documentation date, and diagnosis confirmation date (`Feststellungsdatum`). Ages are computed before dates are converted in the next step.
+The age of the patients (in full years) is calculated at three time points relating to clinical event dates: encounter start (Encounter.period.start), condition documentation date (Condition.recordedDate), and diagnosis confirmation date (`Feststellungsdatum`; Condition.extension:Feststellungsdatum). Ages are computed before dates are converted in the next step.
 
 **Step 10 — Date anonymisation**
 
@@ -103,7 +103,7 @@ The script automatically detects the digit length of PLZ values in the input dat
 | 3 | Dissolved to three-digit postal districts (coarser regions) |
 | 2 | Very coarse aggregation; multiple NUTS3 regions may be spanned |
 
-If your data contains PLZ values of mixed lengths (e.g. some patients with 5-digit codes and others with 2-digit codes), the script processes each length separately and merges the results correctly.
+If the data contains PLZ values of mixed lengths (e.g. for some patients with 5-digit codes and for others with 2-digit codes), the script processes each length separately and merges the results correctly.
 
 A warning is printed for any PLZ digit length outside the supported range of 2–5.
 
