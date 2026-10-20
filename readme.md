@@ -9,28 +9,41 @@ This guide explains how to run `link_plz_nuts3.py`, which assigns German postal 
 You need Python 3.10 or newer and Git. Run the following commands in a terminal (Windows: PowerShell or cmd).
 
 ```shell
-pip install geopandas pandas
+# 1. Download the repository
+git clone https://github.com/BIH-DMBS/kawagen.git
+
+# 2. Change into the script folder
+cd kawagen
+cd kawagen_anonym
+
+# 3. Create a virtual Python environment (only once)
+python -m venv myvenv
+
+# 4. Activate the environment
+#    Windows:
+myvenv\Scripts\activate
+#    Linux / macOS:
+#    source myvenv/bin/activate
+
+# 5. Install the required packages (only once)
+pip install -r requirements.txt
 ```
 
-Place the following files in your working directory before running the script:
+**6. Provide the input data** — either
 
-| File | Description |
-|---|---|
-| `PLZ_Gebiete.gpkg` | GeoPackage of 5-digit PLZ polygons with a `plz` column |
-| `nuts250_12-31.gk3.shape.zip` | ZIP archive containing the NUTS3 boundary shapefile from BKG |
-| `test_data_filled/Diagnose.csv` | FHIR Condition resources (CSV export) |
-| `test_data_filled/KontaktGesundheitseinrichtung.csv` | FHIR Encounter resources (CSV export) |
-| `test_data_filled/PatientPseudonymisiert.csv` | Pseudonymised FHIR Patient resources (CSV export) |
+- **copy** the three CSV files from the FDPG into the folder `kawagen_anonym/input_data/`, **or**
+- **set the path** to the folder containing the files in [`config.ini`](kawagen_anonym/config.ini) (`input_dir = ...`).
 
-In the `folder test_data_ori_fdpg` you find the inital provided to us by the FDPG for the development of the script. 
+The expected file names are the ones delivered by the FDPG:
 
-The script extracts the NUTS3 shapefile from the ZIP archive automatically on first run.
+```
+MII PR Person Patient (Pseudonymisiert).csv
+MII PR Diagnose Condition.csv
+MII PR Fall Kontakt mit einer Gesundheitseinrichtung.csv
+```
 
----
+If your files are named differently, adjust the file names in `config.ini`.
 
-## Running the script
-
-For a first test just run:
 ```shell
 # 7. Run the script
 python link_plz_nuts3.py
