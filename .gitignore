@@ -1,0 +1,12 @@
+# Input data (never commit patient data)
+kawagen_anonym/input_data/*
+!kawagen_anonym/input_data/.gitkeep
+
+# Generated files
+kawagen_anonym/result.csv
+kawagen_anonym/extracted_shapefile/
+
+# Python
+myvenv/
+__pycache__/
+.ipynb_checkpoints/

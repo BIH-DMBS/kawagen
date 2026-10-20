@@ -25,16 +25,16 @@ of this pipeline with intermediate outputs and design notes.
 
 Dependencies
 ------------
-    pip install geopandas pandas
+    pip install -r requirements.txt
 
-Required input files (relative to the working directory)
----------------------------------------------------------
+Required input files (relative to the script folder)
+-----------------------------------------------------
     PLZ_Gebiete.gpkg               5-digit PLZ polygon GeoPackage
     nuts250_12-31.gk3.shape.zip    NUTS3 boundary shapefile (ZIP archive)
-    test_data_filled/
-        Diagnose.csv
-        KontaktGesundheitseinrichtung.csv
-        PatientPseudonymisiert.csv
+    input_data/                    folder and file names set in config.ini
+        MII PR Person Patient (Pseudonymisiert).csv
+        MII PR Diagnose Condition.csv
+        MII PR Fall Kontakt mit einer Gesundheitseinrichtung.csv
 
 Usage
 -----
@@ -42,13 +42,17 @@ Usage
 
 Output
 ------
-    result.csv   Merged table with NUTS3 assignment, calendar-week timestamps,
+    result.csv   (path set in config.ini) Merged table with NUTS3 assignment, calendar-week timestamps,
                  and derived patient ages. No index column.
 """
 
+import configparser
+import os
+import sys
+import zipfile
+
 import pandas as pd
 import geopandas as gpd
-import zipfile
 import numpy as np
 
 
@@ -57,20 +61,35 @@ import numpy as np
 # ===========================================================================
 
 # ---------------------------------------------------------------------------
-# Step 1: 
+# Step 1:
 #   Load clinical CSV files
-#   Change paths according to you input data    
+#   Paths are configured in config.ini (next to this script)
 # ---------------------------------------------------------------------------
 
+# All relative paths are resolved against the script folder, so the script
+# can be started from any working directory.
+script_dir = os.path.dirname(os.path.abspath(__file__))
+config = configparser.ConfigParser()
+config.read(os.path.join(script_dir, "config.ini"), encoding="utf-8")
+
+input_dir = os.path.join(script_dir, config["input"]["input_dir"])
+patient_path  = os.path.join(input_dir, config["input"]["patient_file"])
+diagnose_path = os.path.join(input_dir, config["input"]["diagnose_file"])
+kontakt_path  = os.path.join(input_dir, config["input"]["kontakt_file"])
+result_file_path = os.path.join(script_dir, config["output"]["result_file"])
+
+for path in (patient_path, diagnose_path, kontakt_path):
+    if not os.path.isfile(path):
+        sys.exit(f"Input file not found: {path}\n"
+                 "Copy the CSV files into the input folder or adjust config.ini.")
+
 # PLZ (postal code) must be read as a string to preserve leading zeros.
-diagnose = pd.read_csv("test_data_filled/Diagnose.csv")
-kontaktGesundheitseinrichtung = pd.read_csv("test_data_filled/KontaktGesundheitseinrichtung.csv")
+diagnose = pd.read_csv(diagnose_path)
+kontaktGesundheitseinrichtung = pd.read_csv(kontakt_path)
 patientPseudonymisiert = pd.read_csv(
-    "test_data_filled/PatientPseudonymisiert.csv",
+    patient_path,
     dtype={"Patient_addressStrassenanschrift_postalCode": str}
 )
-# set path tp resultfile
-result_file_path = 'result.csv'
 
 # ===========================================================================
 # Main Pipeline End Part 1
@@ -403,9 +422,10 @@ dOI["Feststellungsdatum"]      = dOI["Feststellungsdatum"].apply(parse_datum)
 # ---------------------------------------------------------------------------
 # Step 6: Load geospatial reference layers
 # ---------------------------------------------------------------------------
-plz_gpkg  = r'PLZ_Gebiete.gpkg'
-zip_file  = r'nuts250_12-31.gk3.shape.zip'
-nuts3_shp = r'extracted_shapefile\nuts250_12-31.gk3.shape\nuts250_1231\NUTS250_N3.shp'
+plz_gpkg    = os.path.join(script_dir, 'PLZ_Gebiete.gpkg')
+zip_file    = os.path.join(script_dir, 'nuts250_12-31.gk3.shape.zip')
+extract_dir = os.path.join(script_dir, 'extracted_shapefile')
+nuts3_shp   = os.path.join(extract_dir, 'nuts250_12-31.gk3.shape', 'nuts250_1231', 'NUTS250_N3.shp')
 
 # Load PLZ polygons
 gdf_plz = gpd.read_file(plz_gpkg)
@@ -415,7 +435,6 @@ try:
     nuts3_gdf = gpd.read_file(nuts3_shp)
 except Exception:
     print(f"Shapefile not found, extracting from {zip_file}...")
-    extract_dir = "extracted_shapefile"
     with zipfile.ZipFile(zip_file, 'r') as z:
         z.extractall(extract_dir)
     nuts3_gdf = gpd.read_file(nuts3_shp)
@@ -470,4 +489,4 @@ dOI = dOI.drop(columns=["Patient_birthDate", "plz"])
 
 print('Saving result...')
 dOI.to_csv(result_file_path, index=False)
-print(f"Done. {len(dOI)} rows written to result.csv")
+print(f"Done. {len(dOI)} rows written to {result_file_path}")
