@@ -80,7 +80,7 @@ Input data and `result.csv` are excluded from Git via `.gitignore`, so patient d
 
 The pipeline runs in eleven steps. The notebook [test_data_merge.ipynb](kawagen_anonym/test_data_merge.ipynb) contains the same pipeline with annotated code and sample outputs for each step.
 
-**Steps 1–5 — Load and merge clinical data.** The three FHIR CSV files are read, normalised and merged into a single dataset. FHIR reference prefixes such as `Patient/` and `Encounter/` are stripped so that IDs can be joined directly. Original patient IDs are replaced with a numeric surrogate key. All date columns are parsed to a uniform, timezone-naive format (full ISO-8601 timestamps, date-only, year-month and year-only strings are supported).
+**Steps 1–5 — Load and merge clinical data.** The three FHIR CSV files are read, normalised and merged into a single dataset. FHIR reference prefixes such as `Patient/` and `Encounter/` are stripped so that IDs can be joined directly. Original patient IDs are replaced with a surrogate key `<ms>_<n>`, where `<ms>` is the number of milliseconds passed since 2020-01-01 (UTC) at the time of the run and `<n>` a running number per patient. The prefix makes IDs from different runs and machines distinct, so results can be pooled. All date columns are parsed to a uniform, timezone-naive format (full ISO-8601 timestamps, date-only, year-month and year-only strings are supported).
 
 **Steps 6–7 — Load and reproject geodata.** The PLZ polygons and the NUTS3 boundaries are loaded and reprojected to EPSG:3035 (ETRS89-LAEA Europe), a metric equal-area projection suitable for area comparisons.
 
@@ -100,7 +100,7 @@ The pipeline runs in eleven steps. The notebook [test_data_merge.ipynb](kawagen_
 
 | Column | Type | Description |
 |---|---|---|
-| `id` | int | Surrogate patient identifier |
+| `id` | str | Surrogate patient identifier, unique across runs (e.g. `214567890123_0`) |
 | `Patient_gender` | str | Gender as recorded in FHIR |
 | `Encounter_period_start` | str | Encounter start, as `YYYY_WW` |
 | `Condition_recordedDate` | str | Condition documentation date, as `YYYY_WW` |

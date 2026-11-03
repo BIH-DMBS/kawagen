@@ -50,6 +50,7 @@ import configparser
 import os
 import sys
 import zipfile
+from datetime import datetime, timezone
 
 import pandas as pd
 import geopandas as gpd
@@ -406,8 +407,12 @@ dOI = pd.merge(
     kontaktGesundheitseinrichtung, how='left', on='encounter_id'
 )
 
-# Replace original patient IDs with a surrogate numeric key
-dOI["id"] = pd.factorize(dOI["patient_id_x"])[0]
+# Replace original patient IDs with a surrogate key of the form
+# "<ms since 2020-01-01 UTC>_<counter>". The run-specific prefix keeps IDs
+# from different runs / machines distinct when results are pooled.
+ms_passed = int((datetime.now(timezone.utc) - datetime(2020, 1, 1, tzinfo=timezone.utc))
+                .total_seconds() * 1000)
+dOI["id"] = [f"{ms_passed}_{i}" for i in pd.factorize(dOI["patient_id_x"])[0]]
 dOI = dOI[[
     'id', 'plz', 'Encounter_period_start', 'Condition_recordedDate',
     'Patient_gender', 'Patient_birthDate', 'Feststellungsdatum'
